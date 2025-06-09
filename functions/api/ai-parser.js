@@ -7,14 +7,24 @@ function generateSystemPrompt() {
     const tomorrow = new Date(now.getTime() + 24*60*60*1000).toISOString().split('T')[0];
     const dayAfterTomorrow = new Date(now.getTime() + 2*24*60*60*1000).toISOString().split('T')[0];
     
+    // Calculate weekdays for better date parsing
+    const currentDay = now.getDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
+    const daysToThisWeekend = (6 - currentDay) % 7; // Days to this Saturday
+    const thisWeekSaturday = new Date(now.getTime() + daysToThisWeekend * 24*60*60*1000).toISOString().split('T')[0];
+    const nextWeekSaturday = new Date(now.getTime() + (daysToThisWeekend + 7) * 24*60*60*1000).toISOString().split('T')[0];
+    
     return `你是一个智能待办事项助理。用户会用自然语言描述他们的待办事项，你需要从中提取以下信息：
 
 1. 日期 (due_date): YYYY-MM-DD格式，如果没有明确指定，根据上下文推断
    - "今天"：${today}
    - "明天"：${tomorrow}
    - "后天"：${dayAfterTomorrow}
-   - 当前日期：${today}
+   - "周六"或"本周六"：${thisWeekSaturday}
+   - "下周六"：${nextWeekSaturday}
+   - 当前日期：${today}，今天是${['周日','周一','周二','周三','周四','周五','周六'][currentDay]}
 2. 时间 (due_time): HH:MM格式，24小时制
+   - 如果用户只说"上午"、"下午"、"晚上"等模糊时间，请在questions中询问具体时间
+   - 只有当用户明确指定具体时间时才填写due_time字段
 3. 主题 (title): 简洁的待办事项标题
 4. 具体描述 (description): 详细描述
 5. 涉及人员 (involved_people): 提到的其他人的姓名或称呼
@@ -24,14 +34,17 @@ function generateSystemPrompt() {
 9. 场景标签 (tags): 相关的标签，如工作、生活、学习等
 
 如果某些信息缺失或不清楚，你需要：
-1. 对于常见缺失信息，直接在extracted中提供默认值：
+1. 对于日期和时间信息：
+   - 如果日期模糊（如用户说"这周"、"下个月"但不明确），必须在questions中询问具体日期
+   - 如果时间模糊（如只说"上午"、"下午"），必须在questions中询问具体时间
+   - 日期和时间是关键信息，宁可询问也不可随意推测
+2. 对于其他常见缺失信息，直接在extracted中提供默认值：
    - 涉及人员 (involved_people): 默认为空数组 []（表示仅创建人自己）
    - 是否提醒 (reminder_enabled): 默认为 true
    - 提醒方式 (reminder_method): 默认为 "系统通知"
    - 紧急程度 (priority): 默认为 "一般"
-2. extracted字段必须包含所有9个字段，缺失的字段用默认值补充
-3. 只对真正重要且无法推断的信息进行询问
-4. 尽量减少询问，提供智能的默认值
+3. extracted字段必须包含所有9个字段，缺失的字段用默认值补充或询问
+4. 对于模糊的日期时间信息，优先询问而不是推测
 
 **重要：必须严格以有效的JSON格式返回，不能包含任何其他文本。返回的JSON必须包含extracted（已提取信息）和questions（需要询问的问题）两个字段。extracted字段必须包含所有9个字段：due_date, due_time, title, description, involved_people, reminder_enabled, reminder_method, priority, tags。
 

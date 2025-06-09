@@ -107,25 +107,37 @@
             class="card p-4"
           >
             <div class="flex items-start space-x-3">
-              <!-- Checkbox -->
-              <button
-                @click="toggleComplete(todo.id)"
-                class="flex-shrink-0 mt-1"
-              >
-                <div
+              <!-- Checkbox or Read-only indicator -->
+              <div v-if="canEditTodo(todo)" class="flex-shrink-0 mt-1">
+                <button
+                  @click="toggleComplete(todo.id)"
                   class="w-5 h-5 rounded border-2 flex items-center justify-center transition-colors"
                   :class="todo.completed ? 'bg-green-500 border-green-500' : 'border-gray-300 hover:border-green-400'"
                 >
                   <svg v-if="todo.completed" class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                   </svg>
-                </div>
-              </button>
+                </button>
+              </div>
+              <!-- Read-only indicator -->
+              <div v-else class="flex-shrink-0 mt-1 w-5 h-5 flex items-center justify-center">
+                <svg v-if="todo.completed" class="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <svg v-else class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+              </div>
 
               <!-- Content -->
               <div class="flex-1">
                 <h4 class="font-medium text-gray-900 mb-1" :class="{ 'line-through opacity-60': todo.completed }">
                   {{ todo.title }}
+                  <!-- Shared from indicator -->
+                  <span v-if="todo.user_relation === 'shared'" class="ml-2 text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                    来自 {{ todo.creator_phone }}
+                  </span>
                 </h4>
                 <p v-if="todo.description" class="text-sm text-gray-600 mb-2" :class="{ 'line-through opacity-60': todo.completed }">
                   {{ todo.description }}
@@ -266,8 +278,25 @@ function getPriorityClass(priority) {
   }
 }
 
+function canEditTodo(todo) {
+  // Owner can always edit
+  if (todo.creator_id === user.value?.id) {
+    return true
+  }
+  // Shared todo with write permission
+  if (todo.user_relation === 'shared' && todo.shared_permission === 'write') {
+    return true
+  }
+  return false
+}
+
 async function toggleComplete(todoId) {
   try {
+    const todo = todosForSelectedDate.value.find(t => t.id === todoId)
+    if (!canEditTodo(todo)) {
+      console.warn('No permission to edit this todo')
+      return
+    }
     await todosStore.toggleTodoComplete(todoId)
   } catch (error) {
     console.error('Toggle todo error:', error)

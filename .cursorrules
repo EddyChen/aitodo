@@ -102,57 +102,52 @@ If needed, you can further use the `web_scraper.py` file to scrape the web page 
 - **AI模型选择**: 对于需要严格JSON格式输出的任务，`deepseek/deepseek-chat` 比 `deepseek/deepseek-r1-0528:free` 更稳定可靠
 - **AI提示优化**: 在系统提示中必须明确要求严格的JSON格式输出，并提供具体示例格式
 - **OpenRouter调试**: `deepseek/deepseek-r1-0528:free` 模型可能返回空响应，需要详细日志调试
+- **OpenRouter API密钥**: 生产环境中OpenRouter API密钥失效，返回401 "No auth credentials found"错误
+- **数据库Schema错误**: 分享功能中SQL语句引用了不存在的`updated_at`字段，需要与实际数据库结构保持一致
+- **状态同步问题**: PUT API更新任务后需要返回包含分享权限信息的完整数据，否则前端权限判断会失效
 
 # Scratchpad
 
-## Current Task: 部署AI待办助理应用到生产环境
+## Current Task: 修复分享功能问题
 
 ### Task Overview
-本地测试已完成，现在需要将AI智能待办助理Web App部署到Cloudflare生产环境：
-- 配置生产环境变量
-- 创建生产数据库
-- 构建并部署前端
-- 验证生产环境功能
+用户测试分享功能发现失败，通过本地服务日志诊断并修复问题。
 
-### 本地测试完成状态
-[X] 1. 本地开发环境启动 - 成功运行在 http://localhost:8788
-[X] 2. 环境变量配置 - 创建.dev.vars文件，API密钥已正确加载
-[X] 3. 基础功能测试 - 登录、日历界面正常工作
-[X] 4. AI解析问题诊断 - 发现AI返回空响应
-[X] 5. 代码调试改进 - 添加详细OpenRouter调试日志
-[X] 6. AI功能深度调试 - 解决token限制问题，AI解析成功
-[X] 7. AI系统优化 - 添加智能默认值，减少用户询问
-[X] 8. 日期解析问题修复 - 解决AI模型日期推断错误
-[X] 9. 完整功能测试 - AI解析、创建、显示待办事项全流程正常
+### 问题诊断进展
+[X] 1. 启动本地开发服务器 - 成功运行在 http://localhost:8788
+[X] 2. 检查分享功能错误日志 - 发现SQL错误：no such column: updated_at
+[X] 3. 定位问题根源 - share.js中SQL语句试图更新不存在的updated_at字段
+[X] 4. 检查数据库schema - 确认todo_shares表只有created_at，没有updated_at
+[X] 5. 修复SQL语句 - 移除对updated_at字段的引用
 
-### 部署任务进展
-[X] 1. 生产环境变量配置 - OpenRouter API密钥已设置
-[X] 2. 创建生产D1数据库 - ai-todo-db (9abb1bc1-f8ed-4a1b-b68a-bc6735cf65d3)
-[X] 3. 运行数据库迁移 - 远程数据库迁移成功
-[X] 4. 创建KV命名空间 - AUTH_KV (c8c7f95847234890a13a0c82cef14696)
-[X] 5. 构建前端资源 - Vite构建成功 (132.72 kB JS + 20.33 kB CSS)
-[X] 6. 部署到Cloudflare Pages - 成功部署到 https://91c8d66d.ai-todo-assistant.pages.dev
-[X] 7. 代码提交到GitHub - 成功推送到 https://github.com/EddyChen/aitodo
-[ ] 8. 生产环境功能验证
+### 修复详情
+**问题**: `functions/api/share.js` 第45行的SQL语句：
+```sql
+DO UPDATE SET permission = ?, updated_at = CURRENT_TIMESTAMP
+```
+试图更新 `todo_shares` 表的 `updated_at` 字段，但该字段不存在。
 
-### 已解决的所有问题 ✅
-1. **API密钥配置**: 已正确配置OpenRouter API密钥
-2. **Token限制问题**: `deepseek/deepseek-r1-0528:free` 推理模型需要更多token空间，已从1000提升到3000
-3. **AI响应优化**: 添加智能默认值（涉及人员、提醒设置、紧急程度），减少用户操作步骤
-4. **调试系统**: 完善的OpenRouter API调用日志系统
-5. **日期解析错误**: AI模型将"明天"解析成错误日期，修复系统提示中的日期推断逻辑，现在"明天下午3点"正确解析为2025-06-10 15:00
-6. **生产环境日期问题**: 修复生产环境中AI解析"明天"为1970年1月1日的问题，将静态模板字符串改为动态生成系统提示
+**解决方案**: 修改SQL语句移除对 `updated_at` 的引用：
+```sql
+DO UPDATE SET permission = ?
+```
+
+### 完成状态
+[X] 1. 测试修复后的分享功能 - 分享功能已正常工作
+[X] 2. 发现新问题 - PUT请求返回405错误
+[X] 3. 修复路由问题 - 创建functions/api/todos/[id].js文件处理带参数的路由
+[X] 4. 用户体验优化 - 添加分享来源显示和权限控制
+[X] 5. Checkbox状态bug修复 - 修复分享任务完成状态切换后图标异常
+[X] 6. 部署修复到生产环境 - 成功部署到 https://31b9d092.ai-todo-assistant.pages.dev
+[ ] 7. 生产环境功能验证
+
+### 用户体验改进
+[X] 1. 分享来源显示 - 别人分享的待办任务显示"来自 xxx"标签
+[X] 2. 权限视觉区分 - 只读任务显示眼睛图标，可编辑任务显示checkbox
+[X] 3. 权限逻辑控制 - 只有拥有者和有写权限的用户才能编辑
 
 ### 技术细节
-- 模型: `deepseek/deepseek-r1-0528:free` (reasoning model)
-- Token限制: 3000
-- 前端: Vue.js with Pinia stores
-- 后端: Cloudflare Workers/Pages
-- 数据库: Cloudflare D1
-- 存储: Cloudflare KV
-- API: OpenRouter with proper authentication
-
-### 下一步计划
-- 配置生产环境
-- 部署到Cloudflare生产环境
-- 验证生产功能
+- 错误类型: D1数据库列不存在错误
+- 影响功能: 待办事项分享
+- 修复文件: functions/api/share.js
+- 本地测试: http://localhost:8788

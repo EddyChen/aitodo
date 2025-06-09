@@ -46,7 +46,7 @@ export async function onRequestPost({ request, env }) {
             INSERT INTO todo_shares (todo_id, user_id, permission)
             VALUES (?, ?, ?)
             ON CONFLICT(todo_id, user_id) 
-            DO UPDATE SET permission = ?, updated_at = CURRENT_TIMESTAMP
+            DO UPDATE SET permission = ?
         `).bind(todo_id, user_id, permission, permission).run();
         
         return new Response(JSON.stringify({
