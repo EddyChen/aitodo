@@ -1,0 +1,157 @@
+# Instructions
+
+During your interaction with the user, if you find anything reusable in this project (e.g. version of a library, model name), especially about a fix to a mistake you made or a correction you received, you should take note in the `Lessons` section in the `.cursorrules` file so you will not make the same mistake again. 
+
+You should also use the `.cursorrules` file as a Scratchpad to organize your thoughts. Especially when you receive a new task, you should first review the content of the Scratchpad, clear old different task if necessary, first explain the task, and plan the steps you need to take to complete the task. You can use todo markers to indicate the progress, e.g.
+[X] Task 1
+[ ] Task 2
+
+Also update the progress of the task in the Scratchpad when you finish a subtask.
+Especially when you finished a milestone, it will help to improve your depth of task accomplishment to use the Scratchpad to reflect and plan.
+The goal is to help you maintain a big picture as well as the progress of the task. Always refer to the Scratchpad when you plan the next step.
+
+# Tools
+
+Note all the tools are in python3. So in the case you need to do batch processing, you can always consult the python files and write your own script.
+
+## Screenshot Verification
+
+The screenshot verification workflow allows you to capture screenshots of web pages and verify their appearance using LLMs. The following tools are available:
+
+1. Screenshot Capture:
+```bash
+venv/bin/python3 tools/screenshot_utils.py URL [--output OUTPUT] [--width WIDTH] [--height HEIGHT]
+```
+
+2. LLM Verification with Images:
+```bash
+venv/bin/python3 tools/llm_api.py --prompt "Your verification question" --provider {openai|anthropic} --image path/to/screenshot.png
+```
+
+Example workflow:
+```python
+from screenshot_utils import take_screenshot_sync
+from llm_api import query_llm
+
+# Take a screenshot
+
+screenshot_path = take_screenshot_sync('https://example.com', 'screenshot.png')
+
+# Verify with LLM
+
+response = query_llm(
+    "What is the background color and title of this webpage?",
+    provider="openai",  # or "anthropic"
+    image_path=screenshot_path
+)
+print(response)
+```
+
+## LLM
+
+You always have an LLM at your side to help you with the task. For simple tasks, you could invoke the LLM by running the following command:
+```
+venv/bin/python3 ./tools/llm_api.py --prompt "What is the capital of France?" --provider "anthropic"
+```
+
+The LLM API supports multiple providers:
+- OpenAI (default, model: gpt-4o)
+- Azure OpenAI (model: configured via AZURE_OPENAI_MODEL_DEPLOYMENT in .env file, defaults to gpt-4o-ms)
+- DeepSeek (model: deepseek-chat)
+- Anthropic (model: claude-3-sonnet-20240229)
+- Gemini (model: gemini-pro)
+- Local LLM (model: Qwen/Qwen2.5-32B-Instruct-AWQ)
+
+But usually it's a better idea to check the content of the file and use the APIs in the `tools/llm_api.py` file to invoke the LLM if needed.
+
+## Web browser
+
+You could use the `tools/web_scraper.py` file to scrape the web.
+```bash
+venv/bin/python3 ./tools/web_scraper.py --max-concurrent 3 URL1 URL2 URL3
+```
+This will output the content of the web pages.
+
+## Search engine
+
+You could use the `tools/search_engine.py` file to search the web.
+```bash
+venv/bin/python3 ./tools/search_engine.py "your search keywords"
+```
+This will output the search results in the following format:
+```
+URL: https://example.com
+Title: This is the title of the search result
+Snippet: This is a snippet of the search result
+```
+If needed, you can further use the `web_scraper.py` file to scrape the web page content.
+
+# Lessons
+
+## User Specified Lessons
+
+- You have a python venv in ./venv. Always use (activate) it when doing python development. First, to check whether 'uv' is available, use `which uv`. If that's the case, first activate the venv, and then use `uv pip install` to install packages. Otherwise, fall back to `pip`.
+- Due to Cursor's limit, when you use `git` and `gh` and need to submit a multiline commit message, first write the message in a file, and then use `git commit -F <filename>` or similar command to commit. And then remove the file. Include "[Cursor] " in the commit message and PR title.
+
+## Cursor learned
+
+- For search results, ensure proper handling of different character encodings (UTF-8) for international queries
+- When using seaborn styles in matplotlib, use 'seaborn-v0_8' instead of 'seaborn' as the style name due to recent seaborn version changes
+- Use 'gpt-4o' as the model name for OpenAI's GPT-4 with vision capabilities
+- When searching for recent news, use the current year (2025) instead of previous years, or simply use the "recent" keyword to get the latest information
+- **AI模型选择**: 对于需要严格JSON格式输出的任务，`deepseek/deepseek-chat` 比 `deepseek/deepseek-r1-0528:free` 更稳定可靠
+- **AI提示优化**: 在系统提示中必须明确要求严格的JSON格式输出，并提供具体示例格式
+- **OpenRouter调试**: `deepseek/deepseek-r1-0528:free` 模型可能返回空响应，需要详细日志调试
+
+# Scratchpad
+
+## Current Task: 部署AI待办助理应用到生产环境
+
+### Task Overview
+本地测试已完成，现在需要将AI智能待办助理Web App部署到Cloudflare生产环境：
+- 配置生产环境变量
+- 创建生产数据库
+- 构建并部署前端
+- 验证生产环境功能
+
+### 本地测试完成状态
+[X] 1. 本地开发环境启动 - 成功运行在 http://localhost:8788
+[X] 2. 环境变量配置 - 创建.dev.vars文件，API密钥已正确加载
+[X] 3. 基础功能测试 - 登录、日历界面正常工作
+[X] 4. AI解析问题诊断 - 发现AI返回空响应
+[X] 5. 代码调试改进 - 添加详细OpenRouter调试日志
+[X] 6. AI功能深度调试 - 解决token限制问题，AI解析成功
+[X] 7. AI系统优化 - 添加智能默认值，减少用户询问
+[X] 8. 日期解析问题修复 - 解决AI模型日期推断错误
+[X] 9. 完整功能测试 - AI解析、创建、显示待办事项全流程正常
+
+### 部署任务进展
+[X] 1. 生产环境变量配置 - OpenRouter API密钥已设置
+[X] 2. 创建生产D1数据库 - ai-todo-db (9abb1bc1-f8ed-4a1b-b68a-bc6735cf65d3)
+[X] 3. 运行数据库迁移 - 远程数据库迁移成功
+[X] 4. 创建KV命名空间 - AUTH_KV (c8c7f95847234890a13a0c82cef14696)
+[X] 5. 构建前端资源 - Vite构建成功 (132.72 kB JS + 20.33 kB CSS)
+[X] 6. 部署到Cloudflare Pages - 成功部署到 https://91c8d66d.ai-todo-assistant.pages.dev
+[ ] 7. 生产环境功能验证
+
+### 已解决的所有问题 ✅
+1. **API密钥配置**: 已正确配置OpenRouter API密钥
+2. **Token限制问题**: `deepseek/deepseek-r1-0528:free` 推理模型需要更多token空间，已从1000提升到3000
+3. **AI响应优化**: 添加智能默认值（涉及人员、提醒设置、紧急程度），减少用户操作步骤
+4. **调试系统**: 完善的OpenRouter API调用日志系统
+5. **日期解析错误**: AI模型将"明天"解析成错误日期，修复系统提示中的日期推断逻辑，现在"明天下午3点"正确解析为2025-06-10 15:00
+6. **生产环境日期问题**: 修复生产环境中AI解析"明天"为1970年1月1日的问题，将静态模板字符串改为动态生成系统提示
+
+### 技术细节
+- 模型: `deepseek/deepseek-r1-0528:free` (reasoning model)
+- Token限制: 3000
+- 前端: Vue.js with Pinia stores
+- 后端: Cloudflare Workers/Pages
+- 数据库: Cloudflare D1
+- 存储: Cloudflare KV
+- API: OpenRouter with proper authentication
+
+### 下一步计划
+- 配置生产环境
+- 部署到Cloudflare生产环境
+- 验证生产功能

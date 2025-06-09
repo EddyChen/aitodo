@@ -1,0 +1,23 @@
+name = "ai-todo-assistant"
+compatibility_date = "2024-01-01"
+pages_build_output_dir = "dist"
+
+# Production D1 Database
+[[d1_databases]]
+binding = "DB"
+database_name = "ai-todo-db"
+database_id = "9abb1bc1-f8ed-4a1b-b68a-bc6735cf65d3"
+
+# Production KV Namespace
+[[kv_namespaces]]
+binding = "AUTH_KV"
+id = "c8c7f95847234890a13a0c82cef14696"
+
+# Environment variables for OpenRouter AI
+[vars]
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+OPENROUTER_MODEL = "deepseek/deepseek-r1-0528:free"
+NODE_ENV = "production"
+
+# These should be set as secrets via wrangler secret put
+# OPENROUTER_API_KEY = "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" 
