@@ -108,38 +108,44 @@ If needed, you can further use the `web_scraper.py` file to scrape the web page 
 
 # Scratchpad
 
-## Current Task: 修复分享功能问题
+## Current Task: AI文本解析精度优化
 
 ### Task Overview
-用户测试分享功能发现失败，通过本地服务日志诊断并修复问题。
+用户发现AI日期时间解析不够精确的问题，需要改进解析策略以确保待办事项的准确性。
 
-### 问题诊断进展
-[X] 1. 启动本地开发服务器 - 成功运行在 http://localhost:8788
-[X] 2. 检查分享功能错误日志 - 发现SQL错误：no such column: updated_at
-[X] 3. 定位问题根源 - share.js中SQL语句试图更新不存在的updated_at字段
-[X] 4. 检查数据库schema - 确认todo_shares表只有created_at，没有updated_at
-[X] 5. 修复SQL语句 - 移除对updated_at字段的引用
+### 问题分析
+1. **日期解析不精确**: "下周六"被错误解析为"本周六"
+2. **时间推测过于随意**: 对"下午"等模糊时间直接推测，容易导致错误
 
-### 修复详情
-**问题**: `functions/api/share.js` 第45行的SQL语句：
-```sql
-DO UPDATE SET permission = ?, updated_at = CURRENT_TIMESTAMP
+### 改进方案
+[X] 1. 日期解析精度提升 - 添加动态周期计算，准确区分本周/下周
+[X] 2. 时间处理策略优化 - 对模糊时间主动询问而非推测
+[X] 3. AI提示优化 - 调整系统提示，强调时间日期的重要性
+[X] 4. 本地测试验证 - 验证"下周五下午"解析效果
+[X] 5. 部署到生产环境 - https://todo.chenrf.top
+[X] 6. 代码提交到GitHub - commit 419f986
+
+### 技术改进详情
+**日期计算优化**:
+```javascript
+const currentDay = now.getDay(); // 0=Sunday, 1=Monday, ..., 6=Saturday
+const daysToThisWeekend = (6 - currentDay) % 7;
+const thisWeekSaturday = new Date(now.getTime() + daysToThisWeekend * 24*60*60*1000);
+const nextWeekSaturday = new Date(now.getTime() + (daysToThisWeekend + 7) * 24*60*60*1000);
 ```
-试图更新 `todo_shares` 表的 `updated_at` 字段，但该字段不存在。
 
-**解决方案**: 修改SQL语句移除对 `updated_at` 的引用：
-```sql
-DO UPDATE SET permission = ?
-```
+**时间处理策略**:
+- 模糊时间（上午/下午/晚上）-> 询问具体时间
+- 明确时间（14:00/16:30）-> 直接使用
 
-### 完成状态
-[X] 1. 测试修复后的分享功能 - 分享功能已正常工作
-[X] 2. 发现新问题 - PUT请求返回405错误
-[X] 3. 修复路由问题 - 创建functions/api/todos/[id].js文件处理带参数的路由
-[X] 4. 用户体验优化 - 添加分享来源显示和权限控制
-[X] 5. Checkbox状态bug修复 - 修复分享任务完成状态切换后图标异常
-[X] 6. 部署修复到生产环境 - 成功部署到 https://31b9d092.ai-todo-assistant.pages.dev
-[ ] 7. 生产环境功能验证
+### 测试结果
+✅ "下周五下午" -> 正确解析为2025-06-20，询问具体时间
+✅ 用户补充"16:00" -> 正确更新时间，清空问题
+✅ 对话流程完整，用户体验良好
+
+### 生产环境域名
+- **自定义域名**: todo.chenrf.top
+- **说明**: 用户申请的自定义域名，后续所有生产环境相关操作都使用此域名
 
 ### 用户体验改进
 [X] 1. 分享来源显示 - 别人分享的待办任务显示"来自 xxx"标签

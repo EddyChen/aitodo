@@ -11,7 +11,7 @@ export async function onRequestGet({ request, env }) {
             headers: {
                 'Authorization': `Bearer ${env.OPENROUTER_API_KEY}`,
                 'Content-Type': 'application/json',
-                'HTTP-Referer': 'https://ai-todo-assistant.pages.dev',
+                'HTTP-Referer': 'https://todo.chenrf.top',
                 'X-Title': 'AI Todo Assistant'
             },
             body: JSON.stringify({
