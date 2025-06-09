@@ -45,10 +45,13 @@ npm install
 
 3. **配置环境变量**
 
-创建 `.env` 文件：
+创建 `.dev.vars` 文件用于本地开发：
 ```env
-OPENROUTER_API_KEY=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
+OPENROUTER_API_KEY=your-openrouter-api-key-here
+JWT_SECRET=your-jwt-secret-here
 ```
+
+> ⚠️ **重要**: 请从 [OpenRouter](https://openrouter.ai/) 获取你自己的API密钥，不要使用任何示例密钥
 
 4. **创建Cloudflare资源**
 

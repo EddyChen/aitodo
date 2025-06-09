@@ -19,7 +19,7 @@
  - 3. 大模型主要信息，使用openrouter作为 llm provider，参数如下,
    BASE_URL=https://openrouter.ai/api/v1
    MODEL_NAME=deepseek/deepseek-r1-0528:free
-   API_KEY=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
+   API_KEY=需要从OpenRouter平台获取
  - 4. 大模型的参数和平台对用户透明，程序部署时设置即可，不需要用户感知
  - 5. 界面设计要大方简洁，易于操作
  - 6. 

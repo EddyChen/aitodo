@@ -20,4 +20,4 @@ OPENROUTER_MODEL = "deepseek/deepseek-r1-0528:free"
 NODE_ENV = "production"
 
 # These should be set as secrets via wrangler secret put
-# OPENROUTER_API_KEY = "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" 
+# OPENROUTER_API_KEY = "your-openrouter-api-key-here" 

@@ -1,0 +1,10 @@
+[Cursor] 修复安全问题：移除暴露的API密钥
+
+安全修复:
+- 从README.md中移除OpenRouter API密钥明文
+- 从prompt.md中移除API密钥信息  
+- 从wrangler.toml中清理示例API密钥
+- 从.dev.vars中移除真实API密钥
+- 添加安全提示，要求用户使用自己的API密钥
+
+确保没有敏感信息暴露在版本控制中。 
