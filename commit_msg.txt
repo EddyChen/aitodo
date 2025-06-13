@@ -1,0 +1,6 @@
+[Cursor] Add detailed error logging for image-parser API debugging
+
+- Enhanced error handling with detailed error information
+- Added console logging for error stack, name, and message
+- Modified response to include debug information for production troubleshooting
+- This will help identify the root cause of the 500 error in production 

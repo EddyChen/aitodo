@@ -201,7 +201,22 @@ export async function onRequestPost({ request, env }) {
         
     } catch (error) {
         console.error('Image Parser error:', error);
-        return new Response(JSON.stringify({ error: '图片解析失败，请重试' }), {
+        console.error('Error stack:', error.stack);
+        console.error('Error name:', error.name);
+        console.error('Error message:', error.message);
+        
+        // Return more specific error information for debugging
+        const errorMessage = error.message || '未知错误';
+        const errorDetails = {
+            error: `图片解析失败: ${errorMessage}`,
+            debug_info: {
+                name: error.name,
+                message: error.message,
+                stack: error.stack?.split('\n').slice(0, 3).join('\n') // First 3 lines of stack trace
+            }
+        };
+        
+        return new Response(JSON.stringify(errorDetails), {
             status: 500,
             headers: { 'Content-Type': 'application/json' }
         });
