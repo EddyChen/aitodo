@@ -75,6 +75,44 @@ class ApiClient {
   async delete(url, options = {}) {
     return this.request('DELETE', url, null, options)
   }
+
+  async postFormData(url, formData, options = {}) {
+    const config = {
+      method: 'POST',
+      headers: {
+        // Don't set Content-Type for FormData, let browser set it with boundary
+        ...options.headers
+      },
+      body: formData,
+      ...options
+    }
+
+    if (this.authToken) {
+      config.headers.Authorization = `Bearer ${this.authToken}`
+    }
+
+    try {
+      const response = await fetch(`${this.baseURL}${url}`, config)
+      
+      if (!response.ok) {
+        if (response.status === 401) {
+          // Token expired or invalid
+          this.authToken = null
+          localStorage.removeItem('auth_token')
+          localStorage.removeItem('auth_user')
+          throw new Error('登录已过期，请重新登录')
+        }
+        
+        const errorData = await response.json().catch(() => ({ error: '网络错误' }))
+        throw new Error(errorData.error || `HTTP ${response.status}`)
+      }
+
+      return await response.json()
+    } catch (error) {
+      console.error('API FormData request error:', error)
+      throw error
+    }
+  }
 }
 
 export const api = new ApiClient() 

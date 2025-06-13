@@ -152,7 +152,7 @@ export async function onRequestPost({ request, env }) {
 
 async function callOpenRouter(messages, env) {
     try {
-        console.log('Calling OpenRouter with model:', env.OPENROUTER_MODEL);
+        console.log('Calling OpenRouter with model:', env.TEXT_MODEL_NAME);
         console.log('Messages:', JSON.stringify(messages, null, 2));
         
         const response = await fetch(`${env.OPENROUTER_BASE_URL}/chat/completions`, {
@@ -164,7 +164,7 @@ async function callOpenRouter(messages, env) {
                 'X-Title': 'AI Todo Assistant'
             },
             body: JSON.stringify({
-                model: env.OPENROUTER_MODEL,
+                model: env.TEXT_MODEL_NAME,
                 messages: messages,
                 temperature: 0.1,
                 max_tokens: 3000

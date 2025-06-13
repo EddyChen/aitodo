@@ -173,15 +173,18 @@
       </div>
     </div>
 
-    <!-- Floating Add Button -->
-    <button
-      @click="goToAddTodo"
-      class="fixed bottom-6 right-6 w-14 h-14 bg-primary-600 text-white rounded-full shadow-lg hover:bg-primary-700 transition-colors flex items-center justify-center z-20"
-    >
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-      </svg>
-    </button>
+    <!-- Floating Action Button -->
+    <div class="fixed bottom-6 right-6 z-20">
+      <!-- Main Add Button -->
+      <button
+        @click="goToAddTodo"
+        class="w-14 h-14 bg-primary-600 text-white rounded-full shadow-lg hover:bg-primary-700 transition-colors flex items-center justify-center"
+      >
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+        </svg>
+      </button>
+    </div>
 
     <!-- Share Modal -->
     <ShareModal
