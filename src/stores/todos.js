@@ -42,6 +42,19 @@ export const useTodosStore = defineStore('todos', () => {
     return countMap
   })
 
+  const todosByDate = computed(() => {
+    const todosMap = {}
+    todos.value.forEach(todo => {
+      if (todo.due_date) {
+        if (!todosMap[todo.due_date]) {
+          todosMap[todo.due_date] = []
+        }
+        todosMap[todo.due_date].push(todo)
+      }
+    })
+    return todosMap
+  })
+
   // Actions
   async function fetchTodos(date = null) {
     isLoading.value = true
@@ -146,6 +159,7 @@ export const useTodosStore = defineStore('todos', () => {
     // Getters
     todosForSelectedDate,
     todosCountByDate,
+    todosByDate,
     
     // Actions
     fetchTodos,

@@ -105,74 +105,48 @@ If needed, you can further use the `web_scraper.py` file to scrape the web page 
 - **OpenRouter API密钥**: 生产环境中OpenRouter API密钥失效，返回401 "No auth credentials found"错误
 - **数据库Schema错误**: 分享功能中SQL语句引用了不存在的`updated_at`字段，需要与实际数据库结构保持一致
 - **状态同步问题**: PUT API更新任务后需要返回包含分享权限信息的完整数据，否则前端权限判断会失效
+- **OpenRouter限流问题**: `google/gemini-2.0-flash-exp:free` 免费模型在OpenRouter上存在限流，可能导致生产环境500错误，需要考虑付费模型或重试机制
 
 # Scratchpad
 
-## Current Task: 图片识别生成待办事项功能开发
+## Current Task: 日历主界面优化
 
 ### Task Overview
-用户需要新增图片上传功能，通过AI分析图片内容（如预约单、通知、票据等），自动提取日期、时间、事项信息生成待办事项。
+优化日历显示主界面，主要包括：
+1. 将日历每天右下角的小圆点改为显示未完成任务数量
+2. 在日历上明确显示工作日、休息日、法定节假日
+3. 使用节假日API获取日期信息并缓存结果
+4. 创建新的版本标签和开发分支
 
 ### 产品需求
-1. **图片上传功能**: 用户可通过拍照/上传图片方式提交内容
-2. **AI图片分析**: 后台使用AI解析图片，提取日期、时间、事项等信息
-3. **自动生成待办**: 根据解析结果自动创建一条或多条待办事项
-4. **UI交互**: 在添加按钮旁增加拍照图标入口
+1. **任务数量显示**: 将日历每天右下角的小圆点改为数字，显示当天未完成的任务数量
+2. **日期类型标识**: 每天明确显示工作日、休息日、法定节假日状态
+3. **节假日API集成**: 使用 `https://api.apihubs.cn/holiday/get` 接口获取节假日信息
+4. **数据缓存**: 将节假日查询结果缓存到KV存储或R2对象存储
 
 ### 技术要求
-1. **模型配置**: 
-   - 图片识别: google/gemini-2.0-flash-exp:free
-   - 文字分析: deepseek/deepseek-r1-0528:free (保持不变)
-2. **存储方案**: 
-   - 图片存储: Cloudflare R2对象存储
-   - 数据库: D1仅存放图片ID引用
-3. **兼容性**: 不影响现有文字输入功能
-
-### 样本图片分析
-- assets/1.jpg: 学校通知照片 
-- assets/2.jpg: 活动购票预约截图
-- assets/3.jpg: 医院挂号照片
+1. **版本管理**: 创建tag v0.1-202506 和新分支 dev
+2. **兼容性**: 不影响现有功能
+3. **性能优化**: 缓存节假日数据，减少API调用
 
 ### 开发计划
-[X] 1. 查看现有项目结构，分析代码架构
-[X] 2. 分析样本图片内容，了解解析需求 - 通过搜索Gemini Vision API文档，了解了技术实现方案
-[X] 3. 设计图片上传和存储方案 - 完成Cloudflare R2存储集成
-[X] 4. 实现图片识别AI分析接口 - functions/api/image-parser.js已完成
-[X] 5. 添加前端拍照/上传UI组件 - AddTodoPage.vue已实现tab切换界面
-[X] 6. 集成图片处理流程到现有待办创建流程 - 已完成集成
-[X] 7. 添加导航入口 - CalendarPage.vue已添加相机按钮
-[X] 8. 本地测试验证功能 - 修复构建错误并重新启动本地服务器，用户测试成功
-[X] 9. 部署到生产环境 - 创建R2存储桶并成功部署到Cloudflare Pages
+[ ] 1. 查看现有CalendarPage.vue实现，了解当前日历渲染逻辑
+[ ] 2. 创建新的git tag和分支
+[ ] 3. 设计节假日数据获取和缓存方案
+[ ] 4. 实现节假日API接口调用
+[ ] 5. 修改日历显示逻辑：小圆点改为任务数量
+[ ] 6. 添加工作日/休息日/法定节假日标识
+[ ] 7. 实现数据缓存机制
+[ ] 8. 测试新功能
+[ ] 9. 部署到生产环境
 
 ### 当前状态
-🎉 **项目完成并已部署到生产环境**！
+🚀 **准备开始日历界面优化**
 
-**✅ 功能完整实现：**
-- **后端API**: functions/api/image-parser.js实现完整图片解析流程
-- **前端UI**: AddTodoPage.vue支持文字/图片双模式输入  
-- **存储方案**: Cloudflare R2对象存储集成
-- **AI模型**: Gemini Vision API图片识别 + DeepSeek文字分析
-- **多待办处理**: 智能批量创建，支持跳过操作
-- **界面优化**: 统一的添加入口，简洁的用户体验
-
-**🌐 生产环境：**
-- **主域名**: https://cba4c747.ai-todo-assistant.pages.dev
-- **别名域名**: https://main.ai-todo-assistant.pages.dev
-- **R2存储**: ai-todo-images桶已创建并配置
-- **环境变量**: JWT_SECRET和OPENROUTER_API_KEY已配置
-
-### 技术修复记录
-- **构建错误修复**: 删除了AddTodoPage.vue中重复定义的函数，解决了"Identifier 'triggerImageUpload' has already been declared"错误
-- **前端构建**: 成功构建生成dist文件夹，包含最新的前端代码
-- **JSON解析修复**: 修复了image-parser.js中的JSON解析问题，正确处理AI返回的markdown格式代码块（```json）
-- **多待办事项处理**: 修复了用户反馈的UX问题，当AI识别出多个待办事项时，创建一个后会自动进入下一个，添加了"跳过这个"按钮和进度提示
-- **界面优化**: 删除了CalendarPage中多余的浮动相机按钮，用户统一通过AddTodoPage的标签切换选择输入模式
-
-### 项目总结
-图片识别生成待办事项功能已经完全开发完成并部署到生产环境。该功能使用Google Gemini Vision API进行图片分析，能够准确识别各种类型的预约单、通知、票据等图片内容，并自动提取日期、时间、事项等信息生成待办事项。
-
-**🎯 主要成就:**
-- AI图片识别准确率极高，支持教育、医疗、娱乐等多种场景
-- 完美处理多个待办事项的批量创建流程
-- 用户体验优化，界面简洁统一
-- 从零开始完整实现了图片上传、AI分析、数据存储的完整链路
+### API接口分析
+节假日API: `https://api.apihubs.cn/holiday/get?size=500&month=202506`
+主要字段：
+- `workday`: 是否为工作日（包含调休）
+- `weekend`: 是否为周末  
+- `holiday_legal`: 是否为法定节假日
+- `date`: 公历日期

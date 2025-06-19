@@ -13,6 +13,11 @@ database_id = "9abb1bc1-f8ed-4a1b-b68a-bc6735cf65d3"
 binding = "AUTH_KV"
 id = "c8c7f95847234890a13a0c82cef14696"
 
+# KV Namespace for caching holiday data
+[[kv_namespaces]]
+binding = "AI_TODO_KV"
+id = "21d6eaa05468481295072f6af3873963"
+
 # R2 Storage for images
 [[r2_buckets]]
 binding = "IMAGE_STORAGE"

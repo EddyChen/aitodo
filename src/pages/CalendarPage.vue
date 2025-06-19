@@ -56,7 +56,7 @@
         
         <!-- Calendar Days -->
         <div class="calendar-grid">
-          <button
+          <div
             v-for="date in calendarDays"
             :key="date.date"
             @click="selectDate(date)"
@@ -65,12 +65,30 @@
               'today': date.isToday,
               'selected': date.date === selectedDate,
               'has-todos': todosCountByDate[date.date] > 0,
-              'text-gray-400': !date.isCurrentMonth
+              'text-gray-400': !date.isCurrentMonth,
+              'workday': date.isCurrentMonth && getDateType(date.date) === 'workday',
+              'weekend': date.isCurrentMonth && getDateType(date.date) === 'weekend',
+              'holiday': date.isCurrentMonth && getDateType(date.date) === 'holiday'
             }"
             :disabled="!date.isCurrentMonth"
           >
-            {{ date.day }}
-          </button>
+            <!-- Day number -->
+            <div class="calendar-day-content">
+              <span class="calendar-day-number">{{ date.day }}</span>
+              
+              <!-- Date type indicator -->
+              <div v-if="date.isCurrentMonth" class="calendar-date-type">
+                <span v-if="getDateType(date.date) === 'workday'" class="date-type-workday">班</span>
+                <span v-else-if="getDateType(date.date) === 'weekend'" class="date-type-weekend">休</span>
+                <span v-else-if="getDateType(date.date) === 'holiday'" class="date-type-holiday">假</span>
+              </div>
+              
+              <!-- Todo count -->
+              <div v-if="todosCountByDate[date.date] > 0" class="calendar-todo-count">
+                {{ getUncompletedTodoCount(date.date) }}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -207,6 +225,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useTodosStore } from '@/stores/todos'
 import ShareModal from '@/components/ShareModal.vue'
+import { api } from '@/utils/api'
 import dayjs from 'dayjs'
 
 const router = useRouter()
@@ -215,6 +234,10 @@ const todosStore = useTodosStore()
 
 const currentDate = ref(dayjs())
 const weekdays = ['日', '一', '二', '三', '四', '五', '六']
+
+// Holiday data
+const holidayData = ref({})
+const loadingHolidays = ref(false)
 
 // Share modal state
 const showShareModal = ref(false)
@@ -332,9 +355,73 @@ function onTodoShared(shareInfo) {
   }, 3000)
 }
 
+// Holiday-related functions
+async function fetchHolidayData(year, month = null) {
+  if (loadingHolidays.value) return
+  
+  try {
+    loadingHolidays.value = true
+    const response = await api.getHolidays(year, month)
+    
+    if (response.success && response.data?.list) {
+      // Convert array to date-indexed object for faster lookup
+      response.data.list.forEach(item => {
+        const date = `${item.year}-${String(item.month).padStart(2, '0')}-${String(item.date).padStart(2, '0')}`
+        holidayData.value[date] = item
+      })
+    }
+  } catch (error) {
+    console.error('Failed to fetch holiday data:', error)
+  } finally {
+    loadingHolidays.value = false
+  }
+}
+
+function getDateType(dateStr) {
+  const holidayInfo = holidayData.value[dateStr]
+  if (!holidayInfo) {
+    // Fallback to basic weekday/weekend detection
+    const dayOfWeek = dayjs(dateStr).day()
+    return dayOfWeek === 0 || dayOfWeek === 6 ? 'weekend' : 'workday'
+  }
+  
+  // Check if it's a legal holiday
+  if (holidayInfo.holiday_legal === 1) {
+    return 'holiday'
+  }
+  
+  // Check if it's a workday (including adjusted workdays)
+  if (holidayInfo.workday === 1) {
+    return 'workday'
+  }
+  
+  // Check if it's weekend
+  if (holidayInfo.weekend === 1) {
+    return 'weekend'
+  }
+  
+  // Default based on weekday
+  const dayOfWeek = dayjs(dateStr).day()
+  return dayOfWeek === 0 || dayOfWeek === 6 ? 'weekend' : 'workday'
+}
+
+function getUncompletedTodoCount(dateStr) {
+  const todos = todosStore.todosByDate[dateStr] || []
+  return todos.filter(todo => !todo.completed).length
+}
+
+// Watch currentDate changes to fetch holiday data
+watch(currentDate, async (newDate) => {
+  const year = newDate.year()
+  await fetchHolidayData(year)
+}, { immediate: false })
+
 onMounted(async () => {
   try {
     await todosStore.fetchTodos()
+    // Fetch holiday data for current year
+    const year = currentDate.value.year()
+    await fetchHolidayData(year)
   } catch (error) {
     console.error('Initial fetch error:', error)
   }

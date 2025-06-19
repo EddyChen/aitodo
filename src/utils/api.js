@@ -113,6 +113,11 @@ class ApiClient {
       throw error
     }
   }
+  // Holiday API methods
+  async getHolidays(year, month = null) {
+    const params = month ? { month: `${year}${month.toString().padStart(2, '0')}` } : { year };
+    return this.get('/holidays', { params });
+  }
 }
 
 export const api = new ApiClient() 
