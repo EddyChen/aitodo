@@ -68,20 +68,14 @@
               'text-gray-400': !date.isCurrentMonth,
               'workday': date.isCurrentMonth && getDateType(date.date) === 'workday',
               'weekend': date.isCurrentMonth && getDateType(date.date) === 'weekend',
-              'holiday': date.isCurrentMonth && getDateType(date.date) === 'holiday'
+              'holiday': date.isCurrentMonth && getDateType(date.date) === 'holiday',
+              'overtime-workday': date.isCurrentMonth && getDateType(date.date) === 'overtime-workday'
             }"
             :disabled="!date.isCurrentMonth"
           >
             <!-- Day number -->
             <div class="calendar-day-content">
               <span class="calendar-day-number">{{ date.day }}</span>
-              
-              <!-- Date type indicator -->
-              <div v-if="date.isCurrentMonth" class="calendar-date-type">
-                <span v-if="getDateType(date.date) === 'workday'" class="date-type-workday">班</span>
-                <span v-else-if="getDateType(date.date) === 'weekend'" class="date-type-weekend">休</span>
-                <span v-else-if="getDateType(date.date) === 'holiday'" class="date-type-holiday">假</span>
-              </div>
               
               <!-- Todo count -->
               <div v-if="todosCountByDate[date.date] > 0" class="calendar-todo-count">
@@ -385,18 +379,29 @@ function getDateType(dateStr) {
     return dayOfWeek === 0 || dayOfWeek === 6 ? 'weekend' : 'workday'
   }
   
-  // Check if it's a legal holiday
+  // Check if it's a legal holiday (法定节假日)
   if (holidayInfo.holiday_legal === 1) {
     return 'holiday'
   }
   
-  // Check if it's a workday (including adjusted workdays)
+  // Check if it's a holiday recess (假期休息日)
+  if (holidayInfo.holiday_recess === 1) {
+    return 'holiday'
+  }
+  
+  // Check if it's an overtime workday (调休工作日)
+  // workday=1 means it's a workday, and if it's normally weekend but needs to work, it's overtime
+  if (holidayInfo.workday === 1 && (holidayInfo.weekend === 1 || holidayInfo.week === 6 || holidayInfo.week === 7)) {
+    return 'overtime-workday'
+  }
+  
+  // Check if it's a regular workday
   if (holidayInfo.workday === 1) {
     return 'workday'
   }
   
-  // Check if it's weekend
-  if (holidayInfo.weekend === 1) {
+  // Check if it's weekend or holiday recess
+  if (holidayInfo.weekend === 1 || holidayInfo.holiday_recess === 2) {
     return 'weekend'
   }
   
