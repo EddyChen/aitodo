@@ -157,8 +157,13 @@ If needed, you can further use the `web_scraper.py` file to scrape the web page 
 
 **🎨 界面改进：**
 - 日历每天显示更丰富的信息：日期数字、类型标识、任务数量
-- 不同日期类型有不同的颜色标识（蓝色边框=工作日，绿色=休息日，红色=法定节假日）
+- 不同日期类型有不同的颜色标识：
+  - 🔵 蓝色背景 = 工作日
+  - 🟢 绿色背景 = 休息日
+  - 🔴 红色背景 = 法定节假日
+  - 🟡 黄色背景 = 调休工作日
 - 任务数量显示在右下角的圆形徽章中
+- 界面更简洁美观，去除了文字标识
 
 ### API接口分析
 节假日API: `https://api.apihubs.cn/holiday/get?size=500&month=202506`

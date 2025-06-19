@@ -92,19 +92,19 @@
   }
   
   .calendar-day.workday {
-    @apply bg-blue-100 border-2 border-blue-400;
+    @apply bg-blue-50;
   }
   
   .calendar-day.weekend {
-    @apply bg-green-100 border-2 border-green-400;
+    @apply bg-green-50;
   }
   
   .calendar-day.holiday {
-    @apply bg-red-100 border-2 border-red-400;
+    @apply bg-red-50;
   }
   
   .calendar-day.overtime-workday {
-    @apply bg-yellow-100 border-2 border-yellow-400;
+    @apply bg-yellow-50;
   }
   
   .calendar-day-content {
@@ -116,7 +116,11 @@
   }
   
   .calendar-todo-count {
-    @apply absolute bottom-1 right-1 bg-primary-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold;
+    @apply absolute bottom-1 right-1 bg-primary-500 text-white rounded-full flex items-center justify-center font-bold;
+    width: 0.75rem;
+    height: 0.75rem;
+    font-size: 0.625rem;
+    line-height: 1;
   }
   
   .calendar-day.today .calendar-todo-count {
