@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "dev": "wrangler pages dev --d1 todos_db --kv AUTH_KV --compatibility-date 2024-01-01",
+    "dev": "wrangler pages dev --d1 todos_db --kv AUTH_KV --kv AI_TODO_KV --compatibility-date 2024-01-01",
     "build": "vite build",
     "deploy": "wrangler pages deploy dist",
     "preview": "vite preview",

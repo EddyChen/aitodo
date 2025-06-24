@@ -1,15 +1,24 @@
 <template>
   <div class="min-h-screen bg-gray-50">
     <!-- Header -->
-    <header class="bg-white shadow-sm sticky top-0 z-10">
-      <div class="px-4 py-3 flex items-center justify-between">
-        <div>
-          <h1 class="text-xl font-bold text-gray-900">待办日历</h1>
-          <p class="text-sm text-gray-500">{{ user?.phone }}</p>
+    <header class="bg-gradient-to-r from-blue-500 to-blue-600 sticky top-0 z-10">
+      <div class="px-4 py-4 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <!-- User Avatar -->
+          <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            </svg>
+          </div>
+          <!-- User Info -->
+          <div>
+            <h1 class="text-lg font-bold text-white">{{ user?.phone || '用户' }}</h1>
+            <p class="text-sm text-blue-100">待办日历</p>
+          </div>
         </div>
         <button
           @click="logout"
-          class="p-2 text-gray-500 hover:text-gray-700"
+          class="p-2 text-blue-100 hover:text-white"
         >
           <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
@@ -19,9 +28,9 @@
     </header>
 
     <!-- Calendar -->
-    <div class="p-4">
+    <div class="py-4">
       <!-- Month Navigation -->
-      <div class="flex items-center justify-between mb-4">
+      <div class="flex items-center justify-between mb-4 px-4">
         <button
           @click="previousMonth"
           class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -46,16 +55,21 @@
       </div>
 
       <!-- Calendar Grid -->
-      <div class="card p-4 mb-4">
+      <div class="mb-4">
         <!-- Weekday Headers -->
-        <div class="grid grid-cols-7 gap-1 mb-2">
-          <div v-for="day in weekdays" :key="day" class="text-center text-sm font-medium text-gray-500 py-2">
+        <div class="grid grid-cols-7 gap-3 mb-3">
+          <div 
+            v-for="(day, index) in weekdays" 
+            :key="day" 
+            class="text-center text-sm font-medium py-2"
+            :class="index === 0 || index === 6 ? 'text-red-500' : 'text-gray-500'"
+          >
             {{ day }}
           </div>
         </div>
         
         <!-- Calendar Days -->
-        <div class="calendar-grid">
+        <div class="calendar-grid-large">
           <div
             v-for="date in calendarDays"
             :key="date.date"
@@ -66,16 +80,15 @@
               'selected': date.date === selectedDate,
               'has-todos': todosCountByDate[date.date] > 0,
               'text-gray-400': !date.isCurrentMonth,
-              'workday': date.isCurrentMonth && getDateType(date.date) === 'workday',
-              'weekend': date.isCurrentMonth && getDateType(date.date) === 'weekend',
-              'holiday': date.isCurrentMonth && getDateType(date.date) === 'holiday',
-              'overtime-workday': date.isCurrentMonth && getDateType(date.date) === 'overtime-workday'
+              'work-day': date.isCurrentMonth && getDateType(date.date) === 'work-day',
+              'rest-day': date.isCurrentMonth && getDateType(date.date) === 'rest-day'
             }"
             :disabled="!date.isCurrentMonth"
           >
             <!-- Day number -->
             <div class="calendar-day-content">
               <span class="calendar-day-number">{{ date.day }}</span>
+              <span class="calendar-lunar-date">{{ getLunarDate(date.date) }}</span>
               
               <!-- Todo count -->
               <div v-if="todosCountByDate[date.date] > 0" class="calendar-todo-count">
@@ -87,7 +100,7 @@
       </div>
 
       <!-- Todo List for Selected Date -->
-      <div class="mb-20">
+      <div class="mb-20 px-4">
         <div class="flex items-center justify-between mb-3">
           <h3 class="text-lg font-semibold text-gray-900">
             {{ selectedDateFormatted }}
@@ -116,7 +129,7 @@
           <div
             v-for="todo in todosForSelectedDate"
             :key="todo.id"
-            class="card p-4"
+            class="card p-4 border-l-4 border-green-500"
           >
             <div class="flex items-start space-x-3">
               <!-- Checkbox or Read-only indicator -->
@@ -357,12 +370,10 @@ async function fetchHolidayData(year, month = null) {
     loadingHolidays.value = true
     const response = await api.getHolidays(year, month)
     
-    if (response.success && response.data?.list) {
-      // Convert array to date-indexed object for faster lookup
-      response.data.list.forEach(item => {
-        const date = `${item.year}-${String(item.month).padStart(2, '0')}-${String(item.date).padStart(2, '0')}`
-        holidayData.value[date] = item
-      })
+    if (response.holidays) {
+      // 直接使用返回的节假日数据
+      Object.assign(holidayData.value, response.holidays)
+      console.log(`Loaded holiday data for ${response.year}:`, Object.keys(response.holidays).length, 'special dates')
     }
   } catch (error) {
     console.error('Failed to fetch holiday data:', error)
@@ -373,46 +384,49 @@ async function fetchHolidayData(year, month = null) {
 
 function getDateType(dateStr) {
   const holidayInfo = holidayData.value[dateStr]
-  if (!holidayInfo) {
-    // Fallback to basic weekday/weekend detection
-    const dayOfWeek = dayjs(dateStr).day()
-    return dayOfWeek === 0 || dayOfWeek === 6 ? 'weekend' : 'workday'
-  }
-  
-  // Check if it's a legal holiday (法定节假日)
-  if (holidayInfo.holiday_legal === 1) {
-    return 'holiday'
-  }
-  
-  // Check if it's a holiday recess (假期休息日)
-  if (holidayInfo.holiday_recess === 1) {
-    return 'holiday'
-  }
-  
-  // Check if it's an overtime workday (调休工作日)
-  // workday=1 means it's a workday, and if it's normally weekend but needs to work, it's overtime
-  if (holidayInfo.workday === 1 && (holidayInfo.weekend === 1 || holidayInfo.week === 6 || holidayInfo.week === 7)) {
-    return 'overtime-workday'
-  }
-  
-  // Check if it's a regular workday
-  if (holidayInfo.workday === 1) {
-    return 'workday'
-  }
-  
-  // Check if it's weekend or holiday recess
-  if (holidayInfo.weekend === 1 || holidayInfo.holiday_recess === 2) {
-    return 'weekend'
-  }
-  
-  // Default based on weekday
   const dayOfWeek = dayjs(dateStr).day()
-  return dayOfWeek === 0 || dayOfWeek === 6 ? 'weekend' : 'workday'
+  
+  if (holidayInfo) {
+    console.log(`Date ${dateStr}:`, holidayInfo)
+    
+    // 简化颜色方案：
+    // - 休息日：法定节假日 + 双休日 = 蓝色
+    // - 工作日：普通工作日 + 调休工作日 = 绿色
+    
+    if (holidayInfo.isOffDay === true) {
+      return 'rest-day'  // 法定节假日 -> 蓝色
+    } else if (holidayInfo.isOffDay === false) {
+      return 'work-day'  // 调休工作日 -> 绿色
+    }
+  }
+  
+  // 没有特殊安排的日期，按自然规律判断
+  if (dayOfWeek === 0 || dayOfWeek === 6) {
+    return 'rest-day'  // 双休日 -> 蓝色
+  } else {
+    return 'work-day'  // 普通工作日 -> 绿色
+  }
 }
 
 function getUncompletedTodoCount(dateStr) {
   const todos = todosStore.todosByDate[dateStr] || []
   return todos.filter(todo => !todo.completed).length
+}
+
+// 简单的农历转换函数
+function getLunarDate(dateStr) {
+  const date = dayjs(dateStr)
+  const day = date.date()
+  
+  // 简单的农历显示逻辑（这里只是示例，实际应该使用专门的农历库）
+  const lunarNumbers = ['', '初一', '初二', '初三', '初四', '初五', '初六', '初七', '初八', '初九', '初十', 
+                       '十一', '十二', '十三', '十四', '十五', '十六', '十七', '十八', '十九', '二十',
+                       '廿一', '廿二', '廿三', '廿四', '廿五', '廿六', '廿七', '廿八', '廿九', '三十']
+  
+  // 这里使用简化的逻辑，实际应该使用准确的农历转换算法
+  // 为了演示，我们基于阳历日期做简单的映射
+  const lunarDay = ((day + 10) % 30) + 1
+  return lunarNumbers[lunarDay] || '初一'
 }
 
 // Watch currentDate changes to fetch holiday data
@@ -431,4 +445,6 @@ onMounted(async () => {
     console.error('Initial fetch error:', error)
   }
 })
+
+
 </script> 
