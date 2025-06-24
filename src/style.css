@@ -72,28 +72,28 @@
   .calendar-grid-large {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 3px;
+    gap: 0.75rem; /* 12px - 匹配星期标题的gap-3 */
+    row-gap: 1rem; /* 16px - 增大行间距，类似标题与第一行的间距 */
     padding: 0;
   }
   
   /* Mobile grid adjustments */
   @media (max-width: 480px) {
     .calendar-grid-large {
-      gap: 2px;
+      gap: 0.75rem; /* 保持与星期标题一致的间距 */
+      row-gap: 0.875rem; /* 14px - 移动端稍小的行间距 */
     }
   }
   
   .calendar-day {
     @apply bg-white rounded-lg shadow-sm flex items-center justify-center text-sm font-medium cursor-pointer hover:shadow-md transition-all relative;
-    min-height: 80px;
-    aspect-ratio: 0.7125; /* 57/80 ratio for larger screens */
+    min-height: 85px; /* 增加高度以显示更多信息 */
   }
   
   /* Mobile responsive adjustments */
   @media (max-width: 480px) {
     .calendar-day {
-      min-height: 70px;
-      aspect-ratio: 0.8; /* Slightly wider ratio for mobile */
+      min-height: 75px; /* 移动端也增加高度 */
     }
     
     .calendar-day-number {
@@ -165,7 +165,9 @@
   }
   
   .calendar-todo-count {
-    @apply absolute top-1 right-1 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold shadow-sm;
+    @apply absolute bg-blue-500 text-white rounded-full flex items-center justify-center font-bold shadow-sm;
+    top: -0.3rem;
+    right: -0.3rem;
     width: 1.25rem;
     height: 1.25rem;
     font-size: 0.75rem;

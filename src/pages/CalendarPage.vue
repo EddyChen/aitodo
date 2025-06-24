@@ -28,7 +28,7 @@
     </header>
 
     <!-- Calendar -->
-    <div class="py-4">
+    <div class="py-4" style="padding: 1rem;">
       <!-- Month Navigation -->
       <div class="flex items-center justify-between mb-4 px-4">
         <button
@@ -100,7 +100,7 @@
       </div>
 
       <!-- Todo List for Selected Date -->
-      <div class="mb-20 px-4">
+      <div class="mb-20">
         <div class="flex items-center justify-between mb-3">
           <h3 class="text-lg font-semibold text-gray-900">
             {{ selectedDateFormatted }}
