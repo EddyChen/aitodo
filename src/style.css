@@ -76,10 +76,39 @@
     padding: 0;
   }
   
+  /* Mobile grid adjustments */
+  @media (max-width: 480px) {
+    .calendar-grid-large {
+      gap: 2px;
+    }
+  }
+  
   .calendar-day {
     @apply bg-white rounded-lg shadow-sm flex items-center justify-center text-sm font-medium cursor-pointer hover:shadow-md transition-all relative;
-    width: 57px;
-    height: 80px;
+    min-height: 80px;
+    aspect-ratio: 0.7125; /* 57/80 ratio for larger screens */
+  }
+  
+  /* Mobile responsive adjustments */
+  @media (max-width: 480px) {
+    .calendar-day {
+      min-height: 70px;
+      aspect-ratio: 0.8; /* Slightly wider ratio for mobile */
+    }
+    
+    .calendar-day-number {
+      @apply text-base font-bold;
+    }
+    
+    .calendar-lunar-date {
+      @apply text-xs;
+    }
+    
+    .calendar-todo-count {
+      width: 1rem;
+      height: 1rem;
+      font-size: 0.625rem;
+    }
   }
   
   .calendar-day.selected {
