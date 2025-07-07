@@ -109,11 +109,23 @@ export async function onRequestPost({ request, env }) {
         // Log the raw AI response for debugging
         console.log('AI raw response:', aiResponse.content);
         
+        // Clean up the response content if it contains code block markers
+        let cleanContent = aiResponse.content.trim();
+        
+        // Remove ```json at the beginning and ``` at the end if present
+        if (cleanContent.startsWith('```json')) {
+            cleanContent = cleanContent.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+        } else if (cleanContent.startsWith('```')) {
+            cleanContent = cleanContent.replace(/^```\s*/, '').replace(/\s*```$/, '');
+        }
+        
+        console.log('Cleaned content for parsing:', cleanContent);
+        
         let parsedResponse;
         try {
-            parsedResponse = JSON.parse(aiResponse.content);
+            parsedResponse = JSON.parse(cleanContent);
         } catch (jsonError) {
-            console.error('JSON parsing failed for response:', aiResponse.content);
+            console.error('JSON parsing failed for response:', cleanContent);
             throw new Error(`AI返回的格式无效: ${jsonError.message}`);
         }
         

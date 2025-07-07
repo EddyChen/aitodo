@@ -108,6 +108,7 @@ If needed, you can further use the `web_scraper.py` file to scrape the web page 
 - **OpenRouter限流问题**: `google/gemini-2.0-flash-exp:free` 免费模型在OpenRouter上存在限流，可能导致生产环境500错误，需要考虑付费模型或重试机制
 - **图片模型升级**: 从 `google/gemini-2.0-flash-exp:free` 升级到 `google/gemini-2.5-flash-preview-05-20`，使用新版本的Gemini模型提升图片解析性能
 - **文字模型统一**: 将文字模型从 `deepseek/deepseek-r1-0528:free` 改为 `google/gemini-2.5-flash-preview-05-20`，统一使用最新的Gemini模型处理文字和图片任务
+- **Gemini模型JSON解析修复**: Gemini 2.5模型返回的JSON内容包含```json代码块标记，需要在JSON.parse前清理这些标记以避免解析错误
 - **Cloudflare Pages Functions兼容性**: Functions环境不支持Node.js的`fs`和`path`模块，需要使用内置数据或Web APIs。Functions必须使用`onRequestGet`等格式而不是`export default`格式。本地KV存储在开发服务器重启后会丢失数据，需要提供fallback机制
 
 # Scratchpad
@@ -259,6 +260,24 @@ curl "http://localhost:8788/api/holidays?year=2025"
 - **视觉层次**: 增加行间距提升可读性
 - **交互优化**: 任务数量圆圈位置更加突出
 
-## Current Task: 等待新任务
+## Current Task: AI模型统一完成 ✅
 
-项目当前状态：所有功能正常运行，移动端和桌面端体验优化完成。
+### 完成的模型升级
+[X] 图片模型升级 - 从 `google/gemini-2.0-flash-exp:free` 升级到 `google/gemini-2.5-flash-preview-05-20`
+[X] 文字模型统一 - 从 `deepseek/deepseek-r1-0528:free` 改为 `google/gemini-2.5-flash-preview-05-20`
+[X] 配置更新 - 更新 wrangler.toml 中的模型配置
+[X] 文档更新 - 更新 API 文档中的模型信息
+[X] 部署完成 - 手动部署到 Cloudflare Pages
+
+### 技术优势
+- **模型统一**: 文字和图片解析都使用同一个 Gemini 2.5 Flash Preview 模型
+- **性能提升**: 使用最新版本的 Gemini 模型，解析性能更强
+- **架构简化**: 避免多个AI服务商，减少复杂性
+- **成本优化**: 使用统一模型减少管理开销
+
+### 部署信息
+- **最新部署**: https://d2594c79.ai-todo-assistant.pages.dev
+- **生产环境**: https://main.ai-todo-assistant.pages.dev
+- **模型配置**: google/gemini-2.5-flash-preview-05-20 (文字+图片)
+
+项目当前状态：所有功能正常运行，AI模型已统一为最新的Gemini 2.5，移动端和桌面端体验优化完成。
