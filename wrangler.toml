@@ -29,7 +29,7 @@ OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 # Text model for regular parsing
 TEXT_MODEL_NAME = "deepseek/deepseek-r1-0528:free"
 # Multi-modal model for image recognition  
-MULTI_MODEL_NAME = "google/gemini-2.0-flash-exp:free"
+MULTI_MODEL_NAME = "google/gemini-2.5-flash-preview-05-20"
 NODE_ENV = "production"
 
 # These should be set as secrets via wrangler secret put

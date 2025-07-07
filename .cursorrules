@@ -106,6 +106,7 @@ If needed, you can further use the `web_scraper.py` file to scrape the web page 
 - **数据库Schema错误**: 分享功能中SQL语句引用了不存在的`updated_at`字段，需要与实际数据库结构保持一致
 - **状态同步问题**: PUT API更新任务后需要返回包含分享权限信息的完整数据，否则前端权限判断会失效
 - **OpenRouter限流问题**: `google/gemini-2.0-flash-exp:free` 免费模型在OpenRouter上存在限流，可能导致生产环境500错误，需要考虑付费模型或重试机制
+- **图片模型升级**: 从 `google/gemini-2.0-flash-exp:free` 升级到 `google/gemini-2.5-flash-preview-05-20`，使用新版本的Gemini模型提升图片解析性能
 - **Cloudflare Pages Functions兼容性**: Functions环境不支持Node.js的`fs`和`path`模块，需要使用内置数据或Web APIs。Functions必须使用`onRequestGet`等格式而不是`export default`格式。本地KV存储在开发服务器重启后会丢失数据，需要提供fallback机制
 
 # Scratchpad
@@ -227,3 +228,36 @@ curl "http://localhost:8788/api/holidays?year=2025"
    - 使用 `!important` 确保今天样式优先级
    - 完善的CSS状态管理，覆盖所有组合情况
    - 保持功能完整性，只调整样式不影响逻辑
+
+## Current Task: 移动端日历布局优化 - 已完成 ✅
+
+### Task Overview ✅
+根据用户反馈优化移动端日历显示，解决截断和布局问题：
+1. 修复移动端日历右侧截断问题
+2. 调整日历格子宽度与星期标题对齐
+3. 优化任务数量圆圈位置
+4. 调整日历容器边距
+
+### 技术实现 ✅
+[X] 移除aspect-ratio属性 - 让日历格子根据屏幕宽度自适应
+[X] 调整grid间距 - 使用0.75rem匹配星期标题的gap-3
+[X] 增加行间距 - 桌面端1rem，移动端0.875rem
+[X] 优化任务数量圆圈位置 - top和right都设为-0.3rem
+[X] 调整日历容器padding - 改为1rem提供合适边距
+
+### 部署状态 ✅
+**🎉 已成功合并到main分支并部署到production！**
+
+**🌐 Production URL**: https://main.ai-todo-assistant.pages.dev
+**📱 移动端兼容性**: 完美适配，无截断问题
+**🎨 视觉效果**: 日期格子与星期标题完美对齐，任务数量圆圈位置优化
+
+### 技术总结
+- **响应式设计**: 移除固定宽高比，使用自适应布局
+- **精确对齐**: grid间距与星期标题保持一致
+- **视觉层次**: 增加行间距提升可读性
+- **交互优化**: 任务数量圆圈位置更加突出
+
+## Current Task: 等待新任务
+
+项目当前状态：所有功能正常运行，移动端和桌面端体验优化完成。
