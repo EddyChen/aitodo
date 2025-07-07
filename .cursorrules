@@ -276,8 +276,9 @@ curl "http://localhost:8788/api/holidays?year=2025"
 - **成本优化**: 使用统一模型减少管理开销
 
 ### 部署信息
-- **最新部署**: https://d2594c79.ai-todo-assistant.pages.dev
+- **最新部署**: https://4964c832.ai-todo-assistant.pages.dev
 - **生产环境**: https://main.ai-todo-assistant.pages.dev
 - **模型配置**: google/gemini-2.5-flash-preview-05-20 (文字+图片)
+- **JSON解析修复**: 已修复Gemini 2.5模型代码块标记问题
 
 项目当前状态：所有功能正常运行，AI模型已统一为最新的Gemini 2.5，移动端和桌面端体验优化完成。
