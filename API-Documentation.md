@@ -9,7 +9,7 @@ AI 智能待办助理是一个基于 Cloudflare Workers 和 Pages 的 Web 应用
 - **技术栈**: Cloudflare Workers、Pages、D1 数据库、KV 存储、R2 对象存储
 - **认证方式**: Bearer Token
 - **数据格式**: JSON
-- **AI 模型**: OpenRouter（文本：deepseek-r1，图片：gemini-2.5-flash-preview）
+- **AI 模型**: OpenRouter（文本和图片：gemini-2.5-flash-preview）
 
 ### 基础 URL
 
@@ -497,7 +497,7 @@ Content-Type: application/json
 {
   "success": true,
   "status": 200,
-  "model": "deepseek/deepseek-r1-0528:free",
+  "model": "google/gemini-2.5-flash-preview-05-20",
   "response": {
     "choices": [
       {
@@ -645,7 +645,7 @@ async function parseImage(imageFile) {
 # OpenRouter AI 配置
 OPENROUTER_API_KEY=your_openrouter_api_key
 OPENROUTER_BASE_URL=https://openrouter.ai/api/v1
-TEXT_MODEL_NAME=deepseek/deepseek-r1-0528:free
+TEXT_MODEL_NAME=google/gemini-2.5-flash-preview-05-20
 MULTI_MODEL_NAME=google/gemini-2.5-flash-preview-05-20
 
 # Cloudflare 服务绑定

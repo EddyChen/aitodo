@@ -107,6 +107,7 @@ If needed, you can further use the `web_scraper.py` file to scrape the web page 
 - **状态同步问题**: PUT API更新任务后需要返回包含分享权限信息的完整数据，否则前端权限判断会失效
 - **OpenRouter限流问题**: `google/gemini-2.0-flash-exp:free` 免费模型在OpenRouter上存在限流，可能导致生产环境500错误，需要考虑付费模型或重试机制
 - **图片模型升级**: 从 `google/gemini-2.0-flash-exp:free` 升级到 `google/gemini-2.5-flash-preview-05-20`，使用新版本的Gemini模型提升图片解析性能
+- **文字模型统一**: 将文字模型从 `deepseek/deepseek-r1-0528:free` 改为 `google/gemini-2.5-flash-preview-05-20`，统一使用最新的Gemini模型处理文字和图片任务
 - **Cloudflare Pages Functions兼容性**: Functions环境不支持Node.js的`fs`和`path`模块，需要使用内置数据或Web APIs。Functions必须使用`onRequestGet`等格式而不是`export default`格式。本地KV存储在开发服务器重启后会丢失数据，需要提供fallback机制
 
 # Scratchpad
